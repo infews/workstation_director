@@ -4,7 +4,7 @@ using Rainbow
 module WorkstationDirector
   class Director
     def initialize(*actor_classes)
-      @actor_classes = Array(actor_classes)
+      @actor_classes = actor_classes
     end
 
     def action!
