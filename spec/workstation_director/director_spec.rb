@@ -38,7 +38,8 @@ RSpec.describe WorkstationDirector::Director do
       context 'that returns false from #present?' do
 
         it 'reports the actor(s) its running' do
-          expect(STDOUT).to have_received(:puts).with(/Directing these actor(s): ActorClass/)
+          expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
+          expect(STDOUT).to have_received(:puts).with(/ActorClass/)
         end
 
         it 'creates the actor' do
@@ -58,7 +59,8 @@ RSpec.describe WorkstationDirector::Director do
         let(:director) {WorkstationDirector::Director.new(present_actor_class)}
 
         it 'reports the actor(s) its running' do
-          expect(STDOUT).to have_received(:puts).with(/Directing these actor(s): PresentActorClass/)
+          expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
+          expect(STDOUT).to have_received(:puts).with(/PresentActorClass/)
         end
 
         it 'creates the actor' do
@@ -82,7 +84,8 @@ RSpec.describe WorkstationDirector::Director do
       end
 
       it 'reports the actor(s) its running' do
-        expect(STDOUT).to have_received(:puts).with(/Directing these actor(s): ActorClass, PresentActorClass/)
+        expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
+        expect(STDOUT).to have_received(:puts).with(/ActorClass, PresentActorClass/)
       end
 
       it 'creates and directs them all' do

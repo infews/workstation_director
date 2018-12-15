@@ -1,3 +1,6 @@
+require 'rainbow'
+using Rainbow
+
 module WorkstationDirector
   class Director
     def initialize(*actor_classes)
@@ -5,7 +8,7 @@ module WorkstationDirector
     end
 
     def action!
-      puts "Directing these actors: " + actor_names
+      puts Rainbow("Directing these actors: ").mediumpurple + actor_names
       @actor_classes.each do |actor_class|
         actor = actor_class.new
         actor.install unless actor.present?
