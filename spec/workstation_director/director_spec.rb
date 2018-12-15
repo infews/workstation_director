@@ -25,21 +25,47 @@ RSpec.describe WorkstationDirector::Director do
     allow(actor).to receive(:setup) {true}
     actor
   end
+  let!(:early_sudo) {WorkstationDirector::SudoUpFront.new}
 
   context '#action!' do
+
     before do
       allow(STDOUT).to receive(:puts)
+      allow(WorkstationDirector::SudoUpFront).to receive(:new) {early_sudo}
+      allow(early_sudo).to receive(:present?)
+      allow(early_sudo).to receive(:install)
+      allow(early_sudo).to receive(:setup).and_return(true)
       director.action!
+    end
+
+    context 'SudoUpFront' do
+      let(:director) {WorkstationDirector::Director.new()}
+
+      it 'reports the actor(s) its running' do
+        expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
+        expect(STDOUT).to have_received(:puts).with(/SudoUpFront/)
+      end
+
+      it 'creates the actor' do
+        expect(WorkstationDirector::SudoUpFront).to have_received(:new)
+      end
+
+      it 'tells the actor to install' do
+        expect(early_sudo).to have_received(:install)
+      end
+
+      it 'tells the actor to setup' do
+        expect(early_sudo).to have_received(:setup)
+      end
     end
 
     context 'with an actor' do
       let(:director) {WorkstationDirector::Director.new(actor_class)}
 
       context 'that returns false from #present?' do
-
         it 'reports the actor(s) its running' do
           expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
-          expect(STDOUT).to have_received(:puts).with(/ActorClass/)
+          expect(STDOUT).to have_received(:puts).with(/SudoUpFront, ActorClass/)
         end
 
         it 'creates the actor' do
@@ -60,7 +86,7 @@ RSpec.describe WorkstationDirector::Director do
 
         it 'reports the actor(s) its running' do
           expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
-          expect(STDOUT).to have_received(:puts).with(/PresentActorClass/)
+          expect(STDOUT).to have_received(:puts).with(/SudoUpFront, PresentActorClass/)
         end
 
         it 'creates the actor' do
@@ -85,7 +111,7 @@ RSpec.describe WorkstationDirector::Director do
 
       it 'reports the actor(s) its running' do
         expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
-        expect(STDOUT).to have_received(:puts).with(/ActorClass, PresentActorClass/)
+        expect(STDOUT).to have_received(:puts).with(/SudoUpFront, ActorClass, PresentActorClass/)
       end
 
       it 'creates and directs them all' do
@@ -105,6 +131,6 @@ RSpec.describe WorkstationDirector::Director do
       it 'stops execution'
       it 'dumps errors'
     end
-
   end
 end
+

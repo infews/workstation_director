@@ -5,6 +5,7 @@ module WorkstationDirector
   class Director
     def initialize(*actor_classes)
       @actor_classes = actor_classes
+      @actor_classes.unshift WorkstationDirector::SudoUpFront
     end
 
     def action!
