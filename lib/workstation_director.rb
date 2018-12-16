@@ -4,6 +4,4 @@ require "workstation_director/actors/sudo_up_front"
 require "workstation_director/director"
 
 module WorkstationDirector
-  class Error < StandardError; end
-  # Your code goes here...
 end

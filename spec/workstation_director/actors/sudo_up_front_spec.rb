@@ -1,12 +1,17 @@
+require 'open3'
+
 module WorkstationDirector
   RSpec.describe SudoUpFront do
 
     let(:actor) {SudoUpFront.new}
 
     context '#setup' do
+      let(:status) do
+        double('exit status 0', :exit_status => 0)
+      end
       before do
         allow(STDOUT).to receive(:puts)
-        allow(Kernel).to receive(:system).and_return(true)
+        allow(Open3).to receive(:capture3).and_return(['', '', status])
         actor.setup
       end
 
@@ -17,10 +22,8 @@ module WorkstationDirector
       end
 
       it 'calls sudo' do
-        expect(Kernel).to have_received(:system).with('sudo -v')
+        expect(Open3).to have_received(:capture3).with('sudo -v')
       end
-
     end
-
   end
 end
