@@ -1,11 +1,13 @@
 require 'rainbow'
+require 'workstation_director/actors/sudo_up_front'
+
 using Rainbow
 
 module WorkstationDirector
   class Director
     def initialize(*actor_classes)
       @actor_classes = actor_classes
-      @actor_classes.unshift WorkstationDirector::SudoUpFront
+      @actor_classes.unshift SudoUpFront
     end
 
     def action!
@@ -15,6 +17,9 @@ module WorkstationDirector
         actor.install unless actor.present?
         actor.setup
       end
+    rescue => e
+      puts Rainbow('Director stopped with this error message:').red
+      raise e
     end
 
     private

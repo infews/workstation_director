@@ -11,7 +11,7 @@ module WorkstationDirector
       end
       before do
         allow(STDOUT).to receive(:puts)
-        allow(Open3).to receive(:capture3).and_return(['', '', status])
+        allow(Open3).to receive(:popen3).and_return(true)
         actor.setup
       end
 
@@ -22,7 +22,7 @@ module WorkstationDirector
       end
 
       it 'calls sudo' do
-        expect(Open3).to have_received(:capture3).with('sudo -v')
+        expect(Open3).to have_received(:popen3).with('sudo -v')
       end
     end
   end

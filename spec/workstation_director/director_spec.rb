@@ -7,8 +7,8 @@ RSpec.describe WorkstationDirector::Director do
   end
   let(:actor) do
     actor = double('Actor')
-    allow(actor).to receive(:install) {true}
     allow(actor).to receive(:present?) {false}
+    allow(actor).to receive(:install) {true}
     allow(actor).to receive(:setup) {true}
     actor
   end
@@ -20,8 +20,8 @@ RSpec.describe WorkstationDirector::Director do
   end
   let(:present_actor) do
     actor = double('Another Actor')
-    allow(actor).to receive(:install) {true}
     allow(actor).to receive(:present?) {true}
+    allow(actor).to receive(:install) {true}
     allow(actor).to receive(:setup) {true}
     actor
   end
@@ -33,13 +33,16 @@ RSpec.describe WorkstationDirector::Director do
       allow(STDOUT).to receive(:puts)
       allow(WorkstationDirector::SudoUpFront).to receive(:new) {early_sudo}
       allow(early_sudo).to receive(:present?)
-      allow(early_sudo).to receive(:install)
+      allow(early_sudo).to receive(:setup)
       allow(early_sudo).to receive(:setup).and_return(true)
-      director.action!
     end
 
     context 'SudoUpFront' do
       let(:director) {WorkstationDirector::Director.new()}
+
+      before do
+        director.action!
+      end
 
       it 'reports the actor(s) its running' do
         expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
@@ -50,8 +53,8 @@ RSpec.describe WorkstationDirector::Director do
         expect(WorkstationDirector::SudoUpFront).to have_received(:new)
       end
 
-      it 'tells the actor to install' do
-        expect(early_sudo).to have_received(:install)
+      it 'tells the actor to setup' do
+        expect(early_sudo).to have_received(:setup)
       end
 
       it 'tells the actor to setup' do
@@ -62,8 +65,12 @@ RSpec.describe WorkstationDirector::Director do
     context 'with an actor' do
       let(:director) {WorkstationDirector::Director.new(actor_class)}
 
+      before do
+        director.action!
+      end
+
       context 'that returns false from #present?' do
-        it 'reports the actor(s) its running' do
+        it 'reports the actor(s) it is running' do
           expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
           expect(STDOUT).to have_received(:puts).with(/SudoUpFront, ActorClass/)
         end
@@ -72,8 +79,8 @@ RSpec.describe WorkstationDirector::Director do
           expect(actor_class).to have_received(:new)
         end
 
-        it 'tells the actor to install' do
-          expect(actor).to have_received(:install)
+        it 'tells the actor to setup' do
+          expect(actor).to have_received(:setup)
         end
 
         it 'tells the actor to setup' do
@@ -109,6 +116,10 @@ RSpec.describe WorkstationDirector::Director do
         WorkstationDirector::Director.new(actor_class, present_actor_class)
       end
 
+      before do
+        director.action!
+      end
+
       it 'reports the actor(s) its running' do
         expect(STDOUT).to have_received(:puts).with(/Directing these actor(s):/)
         expect(STDOUT).to have_received(:puts).with(/SudoUpFront, ActorClass, PresentActorClass/)
@@ -127,9 +138,28 @@ RSpec.describe WorkstationDirector::Director do
       end
     end
 
-    context 'handles errors' do
-      it 'stops execution'
-      it 'dumps errors'
+    context 'when there is an error raised' do
+      let(:actor_class_with_error) {
+        actor_class = class_double('ActorClassWithError')
+        allow(actor_class).to receive(:new) {actor_with_error}
+        allow(actor_class).to receive(:to_s) {'ActorClassWithError'}
+        actor_class
+      }
+      let(:actor_with_error) {
+        actor = double('Actor With Error')
+        allow(actor).to receive(:present?) {raise "Test Error message"}
+        actor
+      }
+      let(:director) {WorkstationDirector::Director.new(actor_class_with_error, actor_class)}
+
+      it 'raises an error and does not execute further actors' do
+        expect {
+          director.action!
+        }.to raise_exception(RuntimeError)
+
+        expect(STDOUT).to have_received(:puts).with(/Director stopped/)
+        expect(actor_class).to_not have_received(:new)
+      end
     end
   end
 end
